@@ -240,4 +240,4 @@ while sistema_ativo:
 
     else:
 
-        print("\nOpção inválida. Tente novamente.")
+        print("\nOpção inválida. Tente novamente.") 
