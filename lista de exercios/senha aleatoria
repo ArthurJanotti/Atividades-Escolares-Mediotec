@@ -1,0 +1,12 @@
+import random
+caracteres = "abcdefghijklmnopqrstuwxyzABCDEFHIJKLMNOPQRSTUVWXYZ0198765421@#$%¨*"
+
+quantidade = int(input("quantos carcteres a senha deve ter? "))
+
+senha = ""
+
+
+for i in range (quantidade):
+    senha+= random.choice(caracteres)
+    
+print(f"\nSenha gerada: {senha}")

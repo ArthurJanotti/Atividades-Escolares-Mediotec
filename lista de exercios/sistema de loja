@@ -1,0 +1,243 @@
+# ==========================================
+# SISTEMA DE LOJA COM CARRINHO DE COMPRAS
+# ==========================================
+
+
+class Produto:
+    def __init__(self, nome, preco, estoque):
+        self.nome = nome
+        self.preco = preco
+        self.__estoque = estoque
+
+    def mostrar_produto(self):
+        print(
+            f"Produto: {self.nome} | "
+            f"Preço: R${self.preco:.2f} | "
+            f"Estoque: {self.__estoque}"
+        )
+
+    def get_estoque(self):
+        return self.__estoque
+
+    def diminuir_estoque(self, quantidade):
+        if quantidade <= self.__estoque:
+            self.__estoque -= quantidade
+            return True
+        return False
+
+
+# Classe filha - Herança
+class ProdutoPromocional(Produto):
+    def __init__(self, nome, preco, estoque, desconto):
+        super().__init__(nome, preco, estoque)
+        self.desconto = desconto
+
+    def calcular_preco_final(self):
+        return self.preco - (self.preco * self.desconto / 100)
+
+    # Polimorfismo
+    def mostrar_produto(self):
+        preco_final = self.calcular_preco_final()
+
+        print(
+            f"Produto: {self.nome} | "
+            f"Preço: R${self.preco:.2f} | "
+            f"Desconto: {self.desconto}% | "
+            f"Preço final: R${preco_final:.2f} | "
+            f"Estoque: {self.get_estoque()}"
+        )
+
+
+class Carrinho:
+    def __init__(self):
+        self.itens = []
+
+    def adicionar_produto(self, produto, quantidade):
+        if quantidade <= 0:
+            print("A quantidade deve ser maior que zero.")
+            return
+
+        if produto.diminuir_estoque(quantidade):
+            item = {
+                "produto": produto,
+                "quantidade": quantidade
+            }
+
+            self.itens.append(item)
+            print("Produto adicionado ao carrinho com sucesso!")
+
+        else:
+            print("Quantidade indisponível no estoque.")
+
+    def mostrar_carrinho(self):
+        if len(self.itens) == 0:
+            print("\nO carrinho está vazio.")
+            return
+
+        print("\n========== CARRINHO ==========")
+
+        total = 0
+
+        for i in range(len(self.itens)):
+            item = self.itens[i]
+            produto = item["produto"]
+            quantidade = item["quantidade"]
+
+            if isinstance(produto, ProdutoPromocional):
+                preco = produto.calcular_preco_final()
+            else:
+                preco = produto.preco
+
+            subtotal = preco * quantidade
+            total += subtotal
+
+            print(
+                f"{i + 1} - {produto.nome} | "
+                f"Quantidade: {quantidade} | "
+                f"Subtotal: R${subtotal:.2f}"
+            )
+
+        print(f"\nTotal da compra: R${total:.2f}")
+
+    def finalizar_compra(self):
+        if len(self.itens) == 0:
+            print("\nO carrinho está vazio.")
+            return
+
+        total = 0
+
+        for item in self.itens:
+            produto = item["produto"]
+            quantidade = item["quantidade"]
+
+            if isinstance(produto, ProdutoPromocional):
+                preco = produto.calcular_preco_final()
+            else:
+                preco = produto.preco
+
+            total += preco * quantidade
+
+        print("\nCompra finalizada com sucesso!")
+        print(f"Valor total: R${total:.2f}")
+
+        self.itens.clear()
+
+
+# ==========================================
+# PROGRAMA PRINCIPAL
+# ==========================================
+
+produtos = []
+carrinho = Carrinho()
+
+sistema_ativo = True
+
+while sistema_ativo:
+
+    print("\n==============================")
+    print("     SISTEMA DE LOJA")
+    print("==============================")
+    print("1 - Cadastrar produto")
+    print("2 - Listar produtos")
+    print("3 - Adicionar ao carrinho")
+    print("4 - Ver carrinho")
+    print("5 - Finalizar compra")
+    print("0 - Sair")
+
+    opcao = input("\nEscolha uma opção: ")
+
+    if opcao == "1":
+
+        print("\n--- CADASTRAR PRODUTO ---")
+
+        nome = input("Nome do produto: ").strip()
+
+        if nome == "":
+            print("O nome não pode ficar vazio.")
+            continue
+
+        preco = float(input("Preço: R$"))
+        estoque = int(input("Quantidade em estoque: "))
+
+        promocao = input(
+            "O produto está em promoção? (sim/não): "
+        ).lower().strip()
+
+        if promocao == "sim":
+
+            desconto = float(
+                input("Digite a porcentagem de desconto: ")
+            )
+
+            produto = ProdutoPromocional(
+                nome,
+                preco,
+                estoque,
+                desconto
+            )
+
+        else:
+            produto = Produto(nome, preco, estoque)
+
+        produtos.append(produto)
+
+        print(f"\nProduto '{nome.title()}' cadastrado com sucesso!")
+
+    elif opcao == "2":
+
+        print("\n--- PRODUTOS DISPONÍVEIS ---")
+
+        if len(produtos) == 0:
+            print("Nenhum produto cadastrado.")
+
+        else:
+            for i, produto in enumerate(produtos):
+                print(f"\nCódigo: {i + 1}")
+                produto.mostrar_produto()
+
+    elif opcao == "3":
+
+        if len(produtos) == 0:
+            print("\nNão existem produtos cadastrados.")
+            continue
+
+        print("\n--- PRODUTOS ---")
+
+        for i, produto in enumerate(produtos):
+            print(f"{i + 1} - {produto.nome}")
+
+        codigo = int(
+            input("\nDigite o código do produto: ")
+        )
+
+        if codigo < 1 or codigo > len(produtos):
+            print("Código inválido.")
+            continue
+
+        quantidade = int(
+            input("Digite a quantidade: ")
+        )
+
+        produto_escolhido = produtos[codigo - 1]
+
+        carrinho.adicionar_produto(
+            produto_escolhido,
+            quantidade
+        )
+
+    elif opcao == "4":
+
+        carrinho.mostrar_carrinho()
+
+    elif opcao == "5":
+
+        carrinho.finalizar_compra()
+
+    elif opcao == "0":
+
+        print("\nObrigado por utilizar o Sistema de Loja!")
+        sistema_ativo = False
+
+    else:
+
+        print("\nOpção inválida. Tente novamente.")
